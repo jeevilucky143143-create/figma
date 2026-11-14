@@ -1,80 +1,92 @@
+%%{init: {'theme': 'base', 'themeVariables': {'background': '#ffffff'}}}%%
 flowchart TB
-    %% Styling based on Evidence Classification
     classDef confirmed fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#000
     classDef inferred fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px,color:#000
-    classDef hypothesis fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#000
+    classDef hypothetical fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#000
     classDef unexamined fill:#e2e3e5,stroke:#6c757d,stroke-width:2px,stroke-dasharray: 5 5,color:#000
 
-    subgraph Layer1 ["1. USER & CLIENT LAYER"]
+    subgraph L1 [1. USER LAYER]
         direction LR
-        Users["Designers & Collaborators\n(E-001, E-005)"]:::confirmed
-        BrowserApp["Browser-Based Figma Editor\n(E-001)"]:::confirmed
+        Designer["Designer / User\n(E-001, E-005)"]:::confirmed
+        Browser["Web Browser\n(E-001)"]:::confirmed
     end
 
-    subgraph Layer2 ["2. FRONTEND / PRESENTATION LAYER"]
+    subgraph L2 [2. FRONTEND LAYER]
         direction TB
-        HomeUI["Home Page / File Browser\n(E-001)"]:::confirmed
-        CanvasUI["Design Canvas / Rendering\n(E-001, E-002)"]:::confirmed
-        LayersUI["Layers Panel\n(E-002)"]:::confirmed
-        PropertiesUI["Properties & Components\n(E-003)"]:::confirmed
-        PrototypeUI["Present Mode / Interactions\n(E-004)"]:::confirmed
-        CommentUI["Collaboration Interface\n(E-005)"]:::confirmed
+        Home["Figma Home Page\n(E-001)"]:::confirmed
+        Editor["Design Editor\n(E-001)"]:::confirmed
+        
+        subgraph Workspace [Editor Interface]
+            direction LR
+            Canvas["Design Canvas\n(E-002)"]:::confirmed
+            Layers["Layers Panel\n(E-002)"]:::confirmed
+            Comps["Components\n(E-003)"]:::confirmed
+            ProtoUI["Prototype Workspace\n(E-004)"]:::confirmed
+            CollabUI["Sharing & Comments Interface\n(E-005)"]:::confirmed
+        end
     end
 
-    subgraph Layer3 ["3. API & COMMUNICATION LAYER"]
+    subgraph AuthLayer [AUTHENTICATION & SECURITY]
         direction LR
-        REST_Gateway["API Gateway / Request Router\n(I-001)"]:::inferred
-        RealTime_WS["Real-Time Sync Channel\n(I-002)"]:::inferred
+        UserAuth["User Authentication\n(Not Examined)"]:::unexamined
+        FilePerms["File Access Permissions\n(E-005)"]:::confirmed
     end
 
-    subgraph Layer4 ["4. BACKEND APPLICATION SERVICES"]
-        direction TB
-        AuthSvc["Auth & Access Control\n(E-001, E-005)"]:::confirmed
-        FileSvc["Design File Management\n(E-001)"]:::confirmed
-        NodeSvc["Document & Node Management\n(E-002, E-003)"]:::confirmed
-        ProtoSvc["Prototype Mapping Service\n(E-004)"]:::confirmed
-        CommentSvc["Comment Management\n(E-005)"]:::confirmed
-        BgTasks["Thumbnail/Export Processing\n(H-001)"]:::hypothesis
-    end
-
-    subgraph Layer5 ["5. REAL-TIME COLLABORATION"]
-        Multiplayer["Multiplayer Sync Engine\n(I-003)"]:::inferred
-    end
-
-    subgraph Layer6 ["6. DATA & STORAGE LAYER"]
+    subgraph L3 [3. API / COMMUNICATION LAYER]
         direction LR
-        UserDB[("User & Permissions\n(I-004)")]:::inferred
-        DocDB[("Design Document Nodes\n(I-005)")]:::inferred
-        CommentDB[("Comments & Feedback\n(I-006)")]:::inferred
-        AssetStore[("Blob / Asset Storage\n(H-002)")]:::hypothesis
-    end
-    
-    subgraph Layer7 ["7. EXTERNAL INTEGRATIONS & MONITORING"]
-        Plugins["Plugin / External Integrations\n(U-001)"]:::unexamined
-        Monitoring["Internal Telemetry\n(U-002)"]:::unexamined
+        AppAPI["Application API / Communication\n(Hypothetical)"]:::hypothetical
+        FileOp["File Operations\n(Hypothetical)"]:::hypothetical
+        DesignOp["Design Operations\n(Hypothetical)"]:::hypothetical
+        CollabOp["Collaboration Requests\n(Hypothetical)"]:::hypothetical
     end
 
-    %% Data Flow & Connections
-    Users <-->|Interacts via Browser| BrowserApp
-    BrowserApp --> HomeUI & CanvasUI & LayersUI & PropertiesUI & PrototypeUI & CommentUI
+    subgraph L4 [4. BACKEND SERVICES]
+        direction LR
+        FileMgmt["File Management\n(Inferred)"]:::inferred
+        DesignMgmt["Design & Layer Management\n(Inferred)"]:::inferred
+        CompMgmt["Component Management\n(Inferred)"]:::inferred
+        ProtoMgmt["Prototype Management\n(Inferred)"]:::inferred
+        CollabMgmt["Sharing & Comment Management\n(Inferred)"]:::inferred
+    end
 
-    %% Standard HTTP Requests
-    HomeUI & PropertiesUI & PrototypeUI -->|REST / HTTP| REST_Gateway
-    REST_Gateway --> AuthSvc & FileSvc & ProtoSvc
-    
-    %% Real-time WebSockets
-    CanvasUI & LayersUI & CommentUI <-->|Live Event Stream| RealTime_WS
-    RealTime_WS <--> Multiplayer
+    subgraph L5 [5. DATA AND STORAGE LAYER]
+        direction LR
+        FileData[("Design File Data\n(Hypothetical)")]:::hypothetical
+        LayerData[("Layers & Component Data\n(Hypothetical)")]:::hypothetical
+        ProtoData[("Prototype Connection Data\n(Hypothetical)")]:::hypothetical
+        CollabData[("Comments & Sharing Data\n(Hypothetical)")]:::hypothetical
+    end
 
-    %% Backend inter-service
-    Multiplayer <--> NodeSvc & CommentSvc
-    NodeSvc <--> ProtoSvc
-    FileSvc -.-> BgTasks
+    %% User interactions (Solid)
+    Designer -->|Uses| Browser
+    Browser -->|Opens| Home
+    Home -->|Loads| Editor
+    Editor --> Workspace
 
-    %% Storage connections
-    AuthSvc --> UserDB
-    FileSvc --> DocDB
-    NodeSvc --> DocDB
-    CommentSvc --> CommentDB
-    CanvasUI -.->|Image/Asset Fetch| AssetStore
-    BgTasks -.-> AssetStore
+    %% Frontend to API (Dashed - Internal details unknown)
+    Home -.-> AppAPI
+    Canvas -.-> DesignOp
+    Layers -.-> DesignOp
+    Comps -.-> DesignOp
+    ProtoUI -.-> DesignOp
+    CollabUI -.-> CollabOp
+    Workspace -.-> FileOp
+
+    %% API to Security (Dashed)
+    AppAPI -.-> UserAuth
+    FileOp -.-> FilePerms
+    CollabOp -.-> FilePerms
+
+    %% API to Backend (Dashed)
+    FileOp -.-> FileMgmt
+    DesignOp -.-> DesignMgmt
+    DesignOp -.-> CompMgmt
+    DesignOp -.-> ProtoMgmt
+    CollabOp -.-> CollabMgmt
+
+    %% Backend to Data (Dashed)
+    FileMgmt -.-> FileData
+    DesignMgmt -.-> LayerData
+    CompMgmt -.-> LayerData
+    ProtoMgmt -.-> ProtoData
+    CollabMgmt -.-> CollabData
